@@ -22,7 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 { row: 5, col: 3 }  // Example: Bottom-right
             ],
             alwaysHiddenCells: [
-                { row: 5, col: 4 } // Example: Always hide cell at (1,1) (value 7 in this grid)
+                { row: 5, col: 4 },
+                { row: 5, col: 0 },
+                { row: 4, col: 8 },
+                { row: 8, col: 1 }
             ]
         },
         {
@@ -42,7 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 { row: 3, col: 3 }  // Example: Left-middle
             ],
             alwaysHiddenCells: [
-                { row: 4, col: 3 } // Example: Always hide cell at (7,7) (value 1 in this grid)
+                { row: 4, col: 3 },
+                { row: 1, col: 0 },
+                { row: 0, col: 3 },
+                { row: 8, col: 4 }
             ]
         },
         {
@@ -62,7 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 { row: 3, col: 5 }  // Center of bottom-right 3x3
             ],
             alwaysHiddenCells: [
-                { row: 3, col: 4 } // Always hide the center cell
+                { row: 3, col: 4 },
+                { row: 0, col: 7 },
+                { row: 3, col: 8 },
+                { row: 4, col: 0 }
             ]
         },
         {
@@ -82,7 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 { row: 5, col: 5 }  // Bottom-left
             ],
             alwaysHiddenCells: [
-                { row: 4, col: 5 }
+                { row: 4, col: 5 },
+                { row: 0, col: 4 },
+                { row: 7, col: 8 },
+                { row: 8, col: 5 }
             ]
         },
         {
@@ -102,7 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 { row: 5, col: 4 }  // Middle of bottom-right 3x3 (shifted)
             ],
             alwaysHiddenCells: [
-                { row: 5, col: 5 }
+                { row: 5, col: 5 },
+                { row: 4, col: 0 },
+                { row: 5, col: 8 },
+                { row: 8, col: 7 }
             ]
         },
         {
@@ -122,7 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 { row: 4, col: 3 }
             ],
             alwaysHiddenCells: [
-                { row: 5, col: 3 }
+                { row: 5, col: 3 },
+                { row: 0, col: 4 },
+                { row: 7, col: 0 },
+                { row: 8, col: 3 }
             ]
         },
         {
@@ -142,7 +160,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 { row: 3, col: 4 }
             ],
             alwaysHiddenCells: [
-                { row: 3, col: 3 }
+                { row: 3, col: 3 },
+                { row: 3, col: 0 },
+                { row: 0, col: 1 },
+                { row: 4, col: 8 }
             ]
         },
         {
@@ -162,7 +183,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 { row: 4, col: 5 }
             ],
             alwaysHiddenCells: [
-                { row: 3, col: 5 }
+                { row: 3, col: 5 },
+                { row: 0, col: 5 },
+                { row: 1, col: 8 },
+                { row: 8, col: 4 }
             ]
         }
         // Add more puzzles here following the same structure
