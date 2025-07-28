@@ -1,0 +1,111 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.sudoku-grid {
+    display: grid;
+    grid-template-columns: repeat(9, 40px);
+    grid-template-rows: repeat(9, 40px);
+    border: 2px solid #333;
+    width: 360px; /* 9 * 40px */
+    height: 360px; /* 9 * 40px */
+    background-color: #fff;
+}
+
+.sudoku-cell {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #000;
+}
+
+/* Borders for 3x3 blocks */
+.sudoku-cell:nth-child(3n) {
+    border-right: 2px solid #333;
+}
+
+.sudoku-cell:nth-child(9n) {
+    border-right: 1px solid #ccc; /* Reset for the last column of a row */
+}
+
+.sudoku-cell:nth-child(27n + 1), /* Start of every third row */
+.sudoku-cell:nth-child(27n + 2),
+.sudoku-cell:nth-child(27n + 3),
+.sudoku-cell:nth-child(27n + 4),
+.sudoku-cell:nth-child(27n + 5),
+.sudoku-cell:nth-child(27n + 6),
+.sudoku-cell:nth-child(27n + 7),
+.sudoku-cell:nth-child(27n + 8),
+.sudoku-cell:nth-child(27n + 9) {
+    border-bottom: 2px solid #333;
+}
+
+/* Adjust top border for rows that are not the first in a 3x3 block */
+.sudoku-cell:nth-child(n + 19):nth-child(-n + 27), /* Rows 3 and 4 */
+.sudoku-cell:nth-child(n + 46):nth-child(-n + 54), /* Rows 6 and 7 */
+.sudoku-cell:nth-child(n + 73):nth-child(-n + 81) { /* Rows 9 and 10 (not applicable as there are only 9 rows) */
+    border-top: 1px solid #ccc;
+}
+
+/* Fix for the bottom border of the last 3x3 block */
+.sudoku-cell:nth-child(n + 73) {
+    border-bottom: 1px solid #ccc;
+}
+
+
+.hidden {
+    color: transparent; /* Makes the number invisible */
+}
+
+.always-visible {
+    background-color: #e0e0e0; /* Optional: Highlight always visible cells */
+}
+
+#next-puzzle-btn {
+    margin-top: 20px; /* Add some space above */
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    background-color: #007bff; /* A different color for distinction */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-right: 10px; /* Space between buttons */
+}
+
+#next-puzzle-btn:hover {
+    background-color: #0056b3;
+}
+
+#show-solution-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+#show-solution-btn:hover {
+    background-color: #45a049;
+}
