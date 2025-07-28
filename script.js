@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const showSolutionBtn = document.getElementById('show-solution-btn');
     const nextPuzzleBtn = document.getElementById('next-puzzle-btn');
 
-    // ALL YOUR SUDOKU GRIDS AND THEIR ALWAYS VISIBLE CELLS
+    // ALL YOUR SUDOKU GRIDS AND THEIR ALWAYS VISIBLE/HIDDEN CELLS
     const allSudokuPuzzles = [
         {
             grid: [
@@ -19,7 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ],
             alwaysVisibleCells: [
                 { row: 0, col: 2 }, // Top-left
-                { row: 5, col: 3 }  // Bottom-right
+                { row: 5, col: 3 }  // Example: Bottom-right
+            ],
+            alwaysHiddenCells: [
+                { row: 5, col: 4 } // Example: Always hide cell at (1,1) (value 7 in this grid)
             ]
         },
         {
@@ -36,7 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ],
             alwaysVisibleCells: [
                 { row: 2, col: 8 }, // Top-middle
-                { row: 3, col: 3 }  // Left-middle
+                { row: 3, col: 3 }  // Example: Left-middle
+            ],
+            alwaysHiddenCells: [
+                { row: 4, col: 3 } // Example: Always hide cell at (7,7) (value 1 in this grid)
             ]
         },
         {
@@ -54,6 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
             alwaysVisibleCells: [
                 { row: 8, col: 6 }, // Center of top-left 3x3
                 { row: 3, col: 5 }  // Center of bottom-right 3x3
+            ],
+            alwaysHiddenCells: [
+                { row: 3, col: 4 } // Always hide the center cell
             ]
         },
         {
@@ -71,6 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
             alwaysVisibleCells: [
                 { row: 6, col: 0 }, // Top-right
                 { row: 5, col: 5 }  // Bottom-left
+            ],
+            alwaysHiddenCells: [
+                { row: 4, col: 5 }
             ]
         },
         {
@@ -88,6 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
             alwaysVisibleCells: [
                 { row: 0, col: 6 }, // Middle of top-left 3x3 (shifted)
                 { row: 5, col: 4 }  // Middle of bottom-right 3x3 (shifted)
+            ],
+            alwaysHiddenCells: [
+                { row: 5, col: 5 }
             ]
         },
         {
@@ -105,6 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
             alwaysVisibleCells: [
                 { row: 6, col: 8 },
                 { row: 4, col: 3 }
+            ],
+            alwaysHiddenCells: [
+                { row: 5, col: 3 }
             ]
         },
         {
@@ -122,6 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
             alwaysVisibleCells: [
                 { row: 8, col: 2 },
                 { row: 3, col: 4 }
+            ],
+            alwaysHiddenCells: [
+                { row: 3, col: 3 }
             ]
         },
         {
@@ -139,38 +160,42 @@ document.addEventListener('DOMContentLoaded', () => {
             alwaysVisibleCells: [
                 { row: 2, col: 0 }, // Center
                 { row: 4, col: 5 }
+            ],
+            alwaysHiddenCells: [
+                { row: 3, col: 5 }
             ]
         }
         // Add more puzzles here following the same structure
     ];
 
-    let currentPuzzleIndex = -1; // -1 indicates no puzzle loaded yet
+    let currentPuzzleIndex = -1;
     let currentFullSudokuGrid = null;
     let currentAlwaysVisibleCells = [];
+    let currentAlwaysHiddenCells = []; // New: To store always hidden cells for current puzzle
 
     const totalCells = 81;
-    const targetVisibleCount = 20; // Aim for about 20 numbers visible
+    const targetVisibleCount = 20;
 
     // Function to select and display a new random puzzle
     function loadNewPuzzle() {
-        // Ensure we don't pick the same puzzle twice in a row if possible (for larger sets)
         let newIndex;
         do {
             newIndex = Math.floor(Math.random() * allSudokuPuzzles.length);
-        } while (newIndex === currentPuzzleIndex && allSudokuPuzzles.length > 1); // Avoid endless loop if only 1 puzzle
+        } while (newIndex === currentPuzzleIndex && allSudokuPuzzles.length > 1);
 
         currentPuzzleIndex = newIndex;
         const selectedPuzzle = allSudokuPuzzles[currentPuzzleIndex];
         currentFullSudokuGrid = selectedPuzzle.grid;
         currentAlwaysVisibleCells = selectedPuzzle.alwaysVisibleCells;
+        currentAlwaysHiddenCells = selectedPuzzle.alwaysHiddenCells; // New: Get always hidden cells
 
-        initializeGrid(currentFullSudokuGrid, true); // Initialize and hide numbers
-        showSolutionBtn.disabled = false; // Re-enable solution button
+        initializeGrid(currentFullSudokuGrid, true);
+        showSolutionBtn.disabled = false;
     }
 
     // Function to initialize the grid
     function initializeGrid(grid, hideNumbers = true) {
-        sudokuGridElement.innerHTML = ''; // Clear existing grid
+        sudokuGridElement.innerHTML = '';
         const cellElements = [];
 
         for (let r = 0; r < 9; r++) {
@@ -179,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 cell.classList.add('sudoku-cell');
                 cell.dataset.row = r;
                 cell.dataset.col = c;
-                cell.textContent = grid[r][c]; // Always set text content to the solution
+                cell.textContent = grid[r][c];
                 cellElements.push(cell);
                 sudokuGridElement.appendChild(cell);
             }
@@ -198,53 +223,77 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.classList.remove('always-visible');
         });
 
-        // Ensure currentAlwaysVisibleCells are indeed visible and marked
-        const initiallyVisibleIndices = new Set();
-        currentAlwaysVisibleCells.forEach(coords => {
+        // Collect all indices that MUST be hidden (alwaysHiddenCells)
+        const mustHideIndices = new Set();
+        currentAlwaysHiddenCells.forEach(coords => {
             const index = coords.row * 9 + coords.col;
             if (index >= 0 && index < totalCells) {
-                cellElements[index].classList.add('always-visible');
-                initiallyVisibleIndices.add(index);
+                mustHideIndices.add(index);
+                cellElements[index].classList.add('hidden'); // Immediately hide them
             }
         });
 
-        // Collect all potential indices to hide
-        const potentialHideIndices = [];
+        // Collect all indices that MUST be visible (alwaysVisibleCells)
+        const mustBeVisibleIndices = new Set();
+        currentAlwaysVisibleCells.forEach(coords => {
+            const index = coords.row * 9 + coords.col;
+            if (index >= 0 && index < totalCells) {
+                // Ensure an 'alwaysVisible' cell isn't also marked as 'alwaysHidden' for safety
+                if (!mustHideIndices.has(index)) {
+                    cellElements[index].classList.add('always-visible');
+                    mustBeVisibleIndices.add(index);
+                } else {
+                    console.warn(`Cell at (${coords.row}, ${coords.col}) is marked as both 'alwaysVisible' and 'alwaysHidden'. 'alwaysHidden' takes precedence.`);
+                }
+            }
+        });
+
+        // Collect all other potential indices that can be randomly hidden or shown
+        const potentialRandomIndices = [];
         for (let i = 0; i < totalCells; i++) {
-            if (!initiallyVisibleIndices.has(i)) {
-                potentialHideIndices.push(i);
+            if (!mustHideIndices.has(i) && !mustBeVisibleIndices.has(i)) {
+                potentialRandomIndices.push(i);
             }
         }
 
-        // Shuffle the potentialHideIndices to pick randomly
-        for (let i = potentialHideIndices.length - 1; i > 0; i--) {
+        // Shuffle the potentialRandomIndices
+        for (let i = potentialRandomIndices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [potentialHideIndices[i], potentialHideIndices[j]] = [potentialHideIndices[j], potentialHideIndices[i]];
+            [potentialRandomIndices[i], potentialRandomIndices[j]] = [potentialRandomIndices[j], potentialRandomIndices[i]];
         }
 
-        let currentlyVisibleCount = initiallyVisibleIndices.size;
+        let currentlyVisibleCount = mustBeVisibleIndices.size; // Start count with always visible cells
 
-        // Hide numbers until we reach the target visible count (or close to it)
-        for (let i = 0; i < potentialHideIndices.length; i++) {
-            const indexToConsider = potentialHideIndices[i];
+        // Iterate through potential random cells to hide/show based on target count
+        for (let i = 0; i < potentialRandomIndices.length; i++) {
+            const indexToConsider = potentialRandomIndices[i];
             if (currentlyVisibleCount >= targetVisibleCount) {
                 cellElements[indexToConsider].classList.add('hidden');
             } else {
-                if (Math.random() < 0.6) { // Adjust this probability to fine-tune the visible count
-                    cellElements[indexToConsider].classList.add('hidden');
+                // Adjust probability to hit closer to targetVisibleCount
+                // This makes it more likely to keep cells visible until the target is met.
+                const remainingToHide = (totalCells - mustHideIndices.size - currentlyVisibleCount) - targetVisibleCount;
+                const remainingCells = potentialRandomIndices.length - i;
+                const probabilityToHide = (remainingToHide > 0 && remainingCells > 0) ? remainingToHide / remainingCells : 0; // If more to hide, higher probability
+
+                if (Math.random() < probabilityToHide || currentlyVisibleCount < 10) { // Keep some initial buffer to ensure minimum visible
+                     cellElements[indexToConsider].classList.add('hidden');
                 } else {
                     currentlyVisibleCount++;
                 }
             }
         }
 
-        // Double-check: ensure always visible cells are definitely not hidden
-        currentAlwaysVisibleCells.forEach(coords => {
-            const index = coords.row * 9 + coords.col;
-            cellElements[index].classList.remove('hidden');
+        // Final check: Ensure cells explicitly marked as always hidden remain hidden
+        mustHideIndices.forEach(index => {
+            cellElements[index].classList.add('hidden');
+        });
+        // Final check: Ensure cells explicitly marked as always visible remain visible and highlighted
+        mustBeVisibleIndices.forEach(index => {
+            cellElements[index].classList.remove('hidden'); // Ensure it's not hidden
+            cellElements[index].classList.add('always-visible'); // Add highlight
         });
     }
-
 
     // Function to show the solution
     function showSolution() {
@@ -252,11 +301,11 @@ document.addEventListener('DOMContentLoaded', () => {
         cells.forEach((cell, index) => {
             const row = parseInt(cell.dataset.row);
             const col = parseInt(cell.dataset.col);
-            cell.textContent = currentFullSudokuGrid[row][col]; // Use the current puzzle's solution
+            cell.textContent = currentFullSudokuGrid[row][col];
             cell.classList.remove('hidden');
             cell.classList.remove('always-visible'); // Remove highlight when showing solution
         });
-        showSolutionBtn.disabled = true; // Disable button after showing solution
+        showSolutionBtn.disabled = true;
     }
 
     // Event listeners
