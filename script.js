@@ -171,10 +171,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPuzzleIndex = -1;
     let currentFullSudokuGrid = null;
     let currentAlwaysVisibleCells = [];
-    let currentAlwaysHiddenCells = []; // New: To store always hidden cells for current puzzle
+    let currentAlwaysHiddenCells = [];
 
     const totalCells = 81;
-    const targetVisibleCount = 20;
+    // Set a minimum for targetVisibleCount that is *greater* than the number of alwaysVisibleCells
+    // and ideally also enough to make the puzzle solvable. Sudoku typically needs 17+ clues.
+    // Ensure this value accounts for alwaysVisibleCells.
+    const targetVisibleClues = 20; // Aim for approximately 20 clues total
 
     // Function to select and display a new random puzzle
     function loadNewPuzzle() {
@@ -187,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedPuzzle = allSudokuPuzzles[currentPuzzleIndex];
         currentFullSudokuGrid = selectedPuzzle.grid;
         currentAlwaysVisibleCells = selectedPuzzle.alwaysVisibleCells;
-        currentAlwaysHiddenCells = selectedPuzzle.alwaysHiddenCells; // New: Get always hidden cells
+        currentAlwaysHiddenCells = selectedPuzzle.alwaysHiddenCells;
 
         initializeGrid(currentFullSudokuGrid, true);
         showSolutionBtn.disabled = false;
@@ -217,30 +220,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to hide random numbers
     function hideRandomNumbers(cellElements) {
-        // Remove existing hidden and always-visible classes first
+        // 1. Reset all cells to default (visible, no highlight)
         cellElements.forEach(cell => {
             cell.classList.remove('hidden');
             cell.classList.remove('always-visible');
         });
 
-        // Collect all indices that MUST be hidden (alwaysHiddenCells)
         const mustHideIndices = new Set();
         currentAlwaysHiddenCells.forEach(coords => {
             const index = coords.row * 9 + coords.col;
             if (index >= 0 && index < totalCells) {
                 mustHideIndices.add(index);
-                cellElements[index].classList.add('hidden'); // Immediately hide them
             }
         });
 
-        // Collect all indices that MUST be visible (alwaysVisibleCells)
         const mustBeVisibleIndices = new Set();
         currentAlwaysVisibleCells.forEach(coords => {
             const index = coords.row * 9 + coords.col;
             if (index >= 0 && index < totalCells) {
-                // Ensure an 'alwaysVisible' cell isn't also marked as 'alwaysHidden' for safety
+                // IMPORTANT: Ensure an 'alwaysVisible' cell isn't also marked as 'alwaysHidden'
                 if (!mustHideIndices.has(index)) {
-                    cellElements[index].classList.add('always-visible');
                     mustBeVisibleIndices.add(index);
                 } else {
                     console.warn(`Cell at (${coords.row}, ${coords.col}) is marked as both 'alwaysVisible' and 'alwaysHidden'. 'alwaysHidden' takes precedence.`);
@@ -248,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Collect all other potential indices that can be randomly hidden or shown
+        // 2. Determine potential cells for random hiding/revealing
         const potentialRandomIndices = [];
         for (let i = 0; i < totalCells; i++) {
             if (!mustHideIndices.has(i) && !mustBeVisibleIndices.has(i)) {
@@ -256,42 +255,40 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Shuffle the potentialRandomIndices
+        // 3. Shuffle the potential random indices
         for (let i = potentialRandomIndices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [potentialRandomIndices[i], potentialRandomIndices[j]] = [potentialRandomIndices[j], potentialRandomIndices[i]];
         }
 
-        let currentlyVisibleCount = mustBeVisibleIndices.size; // Start count with always visible cells
+        // 4. Decide which of the potential random cells to make visible
+        const randomlyVisibleIndices = new Set();
+        let currentVisibleCount = mustBeVisibleIndices.size; // Start count with always visible cells
 
-        // Iterate through potential random cells to hide/show based on target count
-        for (let i = 0; i < potentialRandomIndices.length; i++) {
-            const indexToConsider = potentialRandomIndices[i];
-            if (currentlyVisibleCount >= targetVisibleCount) {
-                cellElements[indexToConsider].classList.add('hidden');
+        // Iterate through shuffled potential cells to reach targetVisibleClues
+        for (const index of potentialRandomIndices) {
+            if (currentVisibleCount < targetVisibleClues) {
+                randomlyVisibleIndices.add(index);
+                currentVisibleCount++;
             } else {
-                // Adjust probability to hit closer to targetVisibleCount
-                // This makes it more likely to keep cells visible until the target is met.
-                const remainingToHide = (totalCells - mustHideIndices.size - currentlyVisibleCount) - targetVisibleCount;
-                const remainingCells = potentialRandomIndices.length - i;
-                const probabilityToHide = (remainingToHide > 0 && remainingCells > 0) ? remainingToHide / remainingCells : 0; // If more to hide, higher probability
-
-                if (Math.random() < probabilityToHide || currentlyVisibleCount < 10) { // Keep some initial buffer to ensure minimum visible
-                     cellElements[indexToConsider].classList.add('hidden');
-                } else {
-                    currentlyVisibleCount++;
-                }
+                // If we've reached the target, the rest of these potential cells should be hidden
+                break; // Exit loop early as we've hit our target for random visibility
             }
         }
 
-        // Final check: Ensure cells explicitly marked as always hidden remain hidden
-        mustHideIndices.forEach(index => {
-            cellElements[index].classList.add('hidden');
-        });
-        // Final check: Ensure cells explicitly marked as always visible remain visible and highlighted
-        mustBeVisibleIndices.forEach(index => {
-            cellElements[index].classList.remove('hidden'); // Ensure it's not hidden
-            cellElements[index].classList.add('always-visible'); // Add highlight
+        // 5. Apply visibility/hidden classes to all cells
+        cellElements.forEach((cell, index) => {
+            if (mustBeVisibleIndices.has(index)) {
+                cell.classList.remove('hidden'); // Ensure it's not hidden
+                cell.classList.add('always-visible'); // Add highlight
+            } else if (mustHideIndices.has(index)) {
+                cell.classList.add('hidden'); // Ensure it's hidden
+            } else if (randomlyVisibleIndices.has(index)) {
+                cell.classList.remove('hidden'); // Make it visible if randomly chosen
+            } else {
+                // All other cells (not always visible, not always hidden, not randomly chosen to be visible)
+                cell.classList.add('hidden');
+            }
         });
     }
 
