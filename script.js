@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set a minimum for targetVisibleCount that is *greater* than the number of alwaysVisibleCells
     // and ideally also enough to make the puzzle solvable. Sudoku typically needs 17+ clues.
     // Ensure this value accounts for alwaysVisibleCells.
-    const targetVisibleClues = 20; // Aim for approximately 20 clues total
+    const targetVisibleClues = 25; // Aim for approximately 20 clues total
 
     // Function to select and display a new random puzzle
     function loadNewPuzzle() {
