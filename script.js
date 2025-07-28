@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ],
             alwaysVisibleCells: [
                 { row: 0, col: 6 }, // Middle of top-left 3x3 (shifted)
-                { row: 5, col: 5 }  // Middle of bottom-right 3x3 (shifted)
+                { row: 5, col: 4 }  // Middle of bottom-right 3x3 (shifted)
             ]
         },
         {
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ],
             alwaysVisibleCells: [
                 { row: 6, col: 8 },
-                { row: 5, col: 3 }
+                { row: 4, col: 3 }
             ]
         },
         {
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ],
             alwaysVisibleCells: [
                 { row: 8, col: 2 },
-                { row: 3, col: 3 }
+                { row: 3, col: 4 }
             ]
         },
         {
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ],
             alwaysVisibleCells: [
                 { row: 2, col: 0 }, // Center
-                { row: 3, col: 5 }
+                { row: 4, col: 5 }
             ]
         }
         // Add more puzzles here following the same structure
