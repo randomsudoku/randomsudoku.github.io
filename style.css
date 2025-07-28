@@ -61,9 +61,9 @@ h1 {
     color: transparent; /* Makes the number invisible */
 }
 
-.always-visible {
-    background-color: #e0e0e0; /* Optional: Highlight always visible cells */
-}
+/*.always-visible {
+    background-color: #e0e0e0;  Optional: Highlight always visible cells 
+} /*
 
 #next-puzzle-btn {
     margin-top: 20px;
