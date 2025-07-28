@@ -62,8 +62,8 @@ h1 {
 }
 
 /*.always-visible {
-    background-color: #e0e0e0;  Optional: Highlight always visible cells 
-} /*
+    background-color: #e0e0e0;  Optional: Highlight always visible cells /*
+} 
 
 #next-puzzle-btn {
     margin-top: 20px;
